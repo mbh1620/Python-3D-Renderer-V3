@@ -1,4 +1,3 @@
-
 class Face:
 
 	def __init__(self, vertices, fNormal, material):
@@ -7,4 +6,3 @@ class Face:
 		self.fNormal = fNormal
 		self.material = material
 
-	

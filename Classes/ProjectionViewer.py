@@ -3,6 +3,7 @@ import pygame
 import numpy as np
 from Classes.Face import Face
 from Classes.Camera import Camera
+from Classes.Wireframe import Wireframe
 
 class ProjectionViewer:
 
@@ -13,7 +14,7 @@ class ProjectionViewer:
 		self.screen = pygame.display.set_mode((width, height))
 		pygame.display.set_caption('3D Renderer')
 
-		self.viewType = 'orthographic' #Can be orthographic or perspective
+		self.viewType = 'orthographic' #Can be orthographic or perspective (this would be better to be a property of the camera)
 
 		self.backgroundColour = (10,10,50)
 		self.camera = Camera([0,0,0],0,0)
@@ -66,7 +67,11 @@ class ProjectionViewer:
 
 	def displayFaces(self, wireframe):
 
-		pass
+		for face in wireframe.faces:
+
+			n1, n2, n3 = face.vertices
+
+			pygame.draw.polygon(self.screen, (255,255,255), [wireframe.nodes[n1][:2], wireframe.nodes[n2][:2], wireframe.nodes[n3][:2]], 0)
 
 	def addWireframe(self, name, wireframe):
 		self.wireframes[name] = wireframe
@@ -75,15 +80,15 @@ class ProjectionViewer:
 
 		key_to_function = {
 
-		pygame.K_LEFT: (lambda x: x.rotateAboutCamera()),
- 		pygame.K_RIGHT:(lambda x: x.rotateAboutCamera()),
- 		pygame.K_DOWN: (lambda x: x.moveCameraUp()),
- 		pygame.K_UP:   (lambda x: x.moveCameraDown()),
+		pygame.K_LEFT: (lambda x: x.rotateAboutCamera('Y', 0.05)),
+ 		pygame.K_RIGHT:(lambda x: x.rotateAboutCamera('Y', -0.05)),
+ 		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),
+ 		pygame.K_UP:   (lambda x: x.moveCameraVertically(-20)),
 
- 		pygame.K_w: (lambda x: x.moveCameraForward(20)),
- 		pygame.K_s: (lambda x: x.moveCameraBackward(20)),
- 		pygame.K_a: (lambda x: x.moveCameraLeft(20)),
- 		pygame.K_d: (lambda x: x.moveCameraRight(20)),
+ 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', 20)),
+ 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', -20)),
+ 		pygame.K_a: (lambda x: x.moveCameraHorizontally('X', 20)),
+ 		pygame.K_d: (lambda x: x.moveCameraHorizontally('X', -20)),
 
 		}
 
@@ -104,5 +109,49 @@ class ProjectionViewer:
 		if keys[pygame.K_d]:
 			key_to_function[pygame.K_d](self)
 
-	def rotateAboutCamera(self):
-		pass
+	def translateAll(self, vector):
+
+		wf = Wireframe()
+		matrix = wf.translationMatrix(*vector)
+		for wireframe in self.wireframes.values():
+			wireframe.transform(matrix)
+
+	def rotateAboutCamera(self, axis, theta):
+		wf = Wireframe()
+
+		matrix = wf.translationMatrix(-self.width/2, -self.height/2,0)
+
+		for wireframe in self.wireframes.values():
+			wireframe.transform(matrix)
+
+		wf = Wireframe()
+		if axis == 'X':
+			matrix = wf.rotateXMatrix(theta)
+		elif axis == 'Y':
+			matrix = wf.rotateYMatrix(theta)
+		elif axis == 'Z':
+			matrix = wf.rotateZMatrix(theta)
+
+		for wireframe in self.wireframes.values():
+			wireframe.transform(matrix)
+		
+		wf = Wireframe()
+		matrix = wf.translationMatrix(self.width/2,self.height/2,0)
+
+		for wireframe in self.wireframes.values():
+			wireframe.transform(matrix)
+
+	def moveCameraVertically(self, amount):
+		
+		self.translateAll([0, amount, 0])
+
+	def moveCameraHorizontally(self, axis, amount):
+		
+		if axis == 'X':
+
+			self.translateAll([amount, 0, 0])
+
+		if axis == 'Z':
+
+			self.translateAll([0, 0, amount])
+
