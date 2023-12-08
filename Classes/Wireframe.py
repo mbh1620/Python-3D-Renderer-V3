@@ -30,6 +30,26 @@ class Wireframe:
 	def transform(self, matrix):
 		self.nodes = np.dot(self.nodes, matrix)
 
+	def transformForPerspective(self, center, fieldOfView, zoom):
+
+		self.perspectiveNodes = self.nodes.copy()
+		for i in range(len(self.nodes)):
+
+			node = self.nodes[i]
+
+			if (zoom-node[2]) > 0:
+				pass
+
+			else:
+
+				pNode = self.perspectiveNodes[i]
+
+				if node[2] != 0 and node[2] > 0:
+					pNode[0] = center[0] + (node[0]-center[0])*fieldOfView/(zoom-(node[2]))
+					pNode[1] = center[1] + (node[1]-center[1])*fieldOfView/(zoom-(node[2]))
+					pNode[2] = node[2] * 1
+
+
 	def translationMatrix(self, dx=0, dy=0, dz=0):
 
 		return np.array([[1,0,0,0],

@@ -2,36 +2,24 @@ from Classes.ProjectionViewer import ProjectionViewer
 from Classes.Wireframe import Wireframe
 from Classes.Edge import Edge
 from Classes.Face import Face
+from Functions.cubeGenerator import cubeGenerator
+from Functions.axisGenerator import axisGenerator
 import numpy as np
 
-centerPoint = []
+centerPoint = Wireframe()
+
+centerPoint.addNodes([[0,0,0]])
 
 projectionViewer1 = ProjectionViewer(1200, 1000, centerPoint)
 
-cubeWireframe = Wireframe()
+axis1 = axisGenerator(500)
 
-nodes = np.array([[0,0,0],
-				  [100,0,0],
-				  [100,100,0],
-				  [0,100,0],
-				  [0,0,100],
-				  [100,0,100],
-				  [100,100,100],
-				  [0,100,100]],
-				  )
+cube1 = cubeGenerator([200,200,200], 200)
 
-cubeWireframe.addNodes(nodes)
+cube2 = cubeGenerator([0,0,0], 100)
 
-edges = [Edge(0,1),Edge(1,2),Edge(2,3),Edge(3,0),
-		Edge(4,5), Edge(5,6), Edge(6,7), Edge(7,4),
-		Edge(4,0), Edge(5,1), Edge(6,2), Edge(7,3)]
-
-cubeWireframe.addEdges(edges)
-
-faces = [Face([0,1,2], [0,0,0], 0), Face([2,3,0], [0,0,0], 0)]
-
-cubeWireframe.addFaces(faces)
-
-projectionViewer1.addWireframe('cubeWireframe', cubeWireframe)
+projectionViewer1.addWireframe('axis1', axis1)
+projectionViewer1.addWireframe('cubeWireframe', cube1)
+projectionViewer1.addWireframe('cubeWireframe2', cube2)
 
 projectionViewer1.run()

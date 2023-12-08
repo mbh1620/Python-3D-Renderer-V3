@@ -14,8 +14,6 @@ class ProjectionViewer:
 		self.screen = pygame.display.set_mode((width, height))
 		pygame.display.set_caption('3D Renderer')
 
-		self.viewType = 'orthographic' #Can be orthographic or perspective (this would be better to be a property of the camera)
-
 		self.backgroundColour = (10,10,50)
 		self.camera = Camera([0,0,0],0,0)
 		self.centerPoint = centerPoint
@@ -47,6 +45,8 @@ class ProjectionViewer:
 
 		for wireframe in self.wireframes.values():
 
+			wireframe.transformForPerspective((self.width/2, self.height/2), self.camera.fieldOfView, self.camera.zoom)
+
 			self.displayNodes(wireframe)
 
 			self.displayEdges(wireframe)
@@ -55,15 +55,17 @@ class ProjectionViewer:
 
 	def displayNodes(self, wireframe):
 
-		for node in wireframe.nodes:
+		for node in wireframe.perspectiveNodes:
 
-			pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
+			if self.camera.zoom-node[2] < 0:
+
+				pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
 
 	def displayEdges(self, wireframe):
 
 		for edge in wireframe.edges:
-
-			pygame.draw.aaline(self.screen, wireframe.edgeColour, wireframe.nodes[edge.node1Index][:2], wireframe.nodes[edge.node2Index][:2], 1)
+			if self.camera.zoom - wireframe.perspectiveNodes[edge.node1Index][2] < 0 and self.camera.zoom - wireframe.perspectiveNodes[edge.node2Index][2] < 0:
+				pygame.draw.aaline(self.screen, wireframe.edgeColour, wireframe.perspectiveNodes[edge.node1Index][:2], wireframe.perspectiveNodes[edge.node2Index][:2], 1)
 
 	def displayFaces(self, wireframe):
 
@@ -85,10 +87,10 @@ class ProjectionViewer:
  		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),
  		pygame.K_UP:   (lambda x: x.moveCameraVertically(-20)),
 
- 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', 20)),
- 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', -20)),
- 		pygame.K_a: (lambda x: x.moveCameraHorizontally('X', 20)),
- 		pygame.K_d: (lambda x: x.moveCameraHorizontally('X', -20)),
+ 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -20)),
+ 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', 20)),
+ 		pygame.K_a: (lambda x: x.moveCameraHorizontally('X', -20)),
+ 		pygame.K_d: (lambda x: x.moveCameraHorizontally('X', 20)),
 
 		}
 
