@@ -4,6 +4,7 @@ from Classes.Edge import Edge
 from Classes.Face import Face
 from Functions.cubeGenerator import cubeGenerator
 from Functions.axisGenerator import axisGenerator
+from Functions.normaliseVector import crossProduct
 import numpy as np
 
 centerPoint = Wireframe()
@@ -14,12 +15,11 @@ projectionViewer1 = ProjectionViewer(1200, 1000, centerPoint)
 
 axis1 = axisGenerator(500)
 
-cube1 = cubeGenerator([200,200,200], 200)
+cube3 = cubeGenerator([500,500,500], 1000)
 
-cube2 = cubeGenerator([0,0,0], 100)
+projectionViewer1.addWireframe('centerPoint', centerPoint)
 
 projectionViewer1.addWireframe('axis1', axis1)
-projectionViewer1.addWireframe('cubeWireframe', cube1)
-projectionViewer1.addWireframe('cubeWireframe2', cube2)
+projectionViewer1.addWireframe('cubeWireframe3', cube3)
 
 projectionViewer1.run()

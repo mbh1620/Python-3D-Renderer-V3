@@ -1,5 +1,6 @@
 from Classes.Wireframe import Wireframe
 from Classes.Edge import Edge
+from Classes.Face import Face
 import numpy as np
 
 def cubeGenerator(position, size):
@@ -22,7 +23,11 @@ def cubeGenerator(position, size):
 		Edge(4,5), Edge(5,6), Edge(6,7), Edge(7,4),
 		Edge(4,0), Edge(5,1), Edge(6,2), Edge(7,3)]
 
+	faces = [Face([0,1,2], [0,0,0], []),
+			 Face([2,3,0], [0,0,0], [])]
+			 
 	cubeWireframe.addEdges(edges)
+	cubeWireframe.addFaces(faces)
 
 	return cubeWireframe
 
