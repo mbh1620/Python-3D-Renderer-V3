@@ -43,6 +43,9 @@ class ProjectionViewer:
 			self.processKeys(keys)
 			self.display()
 
+			print(self.camera.position)
+			print(self.wireframes['cubeWireframe3'].nodes[0][2])
+
 			pygame.display.flip()
 
 	def display(self):
@@ -79,11 +82,7 @@ class ProjectionViewer:
 
 		for face in wireframe.faces:
 
-			n1, n2, n3 = face.vertices
-
-			# if self.checkFace(face, wireframe):
-
-			outputPoints = self.clipFaceAgainstPlane([0,0,1000], [0,0,1], face, wireframe)
+			outputPoints = self.clipFaceAgainstPlane([0,0,0], [0,0,1], face, wireframe)
 
 			if len(outputPoints) == 3:
 
@@ -91,8 +90,8 @@ class ProjectionViewer:
 
 			elif len(outputPoints) == 6:
 				
-				pygame.draw.polygon(self.screen, (0,0,255), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
-				pygame.draw.polygon(self.screen, (0,255,0), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
+				pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
+				pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
 
 	def checkNode(self, node, wireframe):
 
@@ -145,9 +144,9 @@ class ProjectionViewer:
 
 		planeNormal = normaliseVector(planeNormal)
 
-		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[0]])
-		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[1]])
-		distance3 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[2]])
+		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[face.vertices[0]])
+		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[face.vertices[1]])
+		distance3 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[face.vertices[2]])
 
 		insidePoints = []
 		outsidePoints = []
@@ -210,6 +209,7 @@ class ProjectionViewer:
 		return ((planeNormal[0] * point[0])+(planeNormal[1]*point[1])+(planeNormal[2]*point[2]) - dotProduct(planeNormal, pointOnPlane))
 
 	def addWireframe(self, name, wireframe):
+		
 		self.wireframes[name] = wireframe
 
 	def processKeys(self, keys):
@@ -288,6 +288,8 @@ class ProjectionViewer:
 			self.translateAll([amount, 0, 0])
 
 		if axis == 'Z':
+
+			self.camera.position[2] += amount
 
 			self.translateAll([0, 0, amount])
 
