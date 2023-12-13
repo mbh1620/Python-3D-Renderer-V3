@@ -16,10 +16,12 @@ projectionViewer1 = ProjectionViewer(1200, 1000, centerPoint)
 axis1 = axisGenerator(500)
 
 cube3 = cubeGenerator([500,500,500], 1000)
-
+	
 projectionViewer1.addWireframe('centerPoint', centerPoint)
 
 projectionViewer1.addWireframe('axis1', axis1)
-projectionViewer1.addWireframe('cubeWireframe3', cube3)
+
+projectionViewer1.addWireframe('cube1', cube3)
+
 
 projectionViewer1.run()

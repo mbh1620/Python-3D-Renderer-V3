@@ -39,8 +39,8 @@ class Wireframe:
 			pNode = self.perspectiveNodes[i]
 
 			if (zoom-node[2]) != 0:
-				pNode[0] = (center[0] + (node[0]-center[0])*fieldOfView/-abs(zoom-(node[2])))
-				pNode[1] = (center[1] + (node[1]-center[1])*fieldOfView/-abs(zoom-(node[2])))
+				pNode[0] = (center[0] + (node[0]-center[0])*fieldOfView/(zoom-(node[2])))
+				pNode[1] = (center[1] + (node[1]-center[1])*fieldOfView/(zoom-(node[2])))
 				pNode[2] = node[2] * 1
 
 	def translationMatrix(self, dx=0, dy=0, dz=0):

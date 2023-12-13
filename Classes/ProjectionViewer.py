@@ -43,8 +43,8 @@ class ProjectionViewer:
 			self.processKeys(keys)
 			self.display()
 
-			print(self.camera.position)
-			print(self.wireframes['cubeWireframe3'].nodes[0][2])
+			# print(self.camera.position)
+			# print(self.wireframes['cubeWireframe3'].nodes[0][2])
 
 			pygame.display.flip()
 
@@ -82,16 +82,18 @@ class ProjectionViewer:
 
 		for face in wireframe.faces:
 
-			outputPoints = self.clipFaceAgainstPlane([0,0,0], [0,0,1], face, wireframe)
+			print(200-self.camera.position[2])
+
+			outputPoints = self.clipFaceAgainstPlane([0,0,500], [0,0,1], face, wireframe)
 
 			if len(outputPoints) == 3:
 
-				pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
+				pygame.draw.polygon(self.screen, (0,255,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
 
 			elif len(outputPoints) == 6:
 				
 				pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
-				pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
+				pygame.draw.polygon(self.screen, (0,0,255), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
 
 	def checkNode(self, node, wireframe):
 
@@ -144,9 +146,9 @@ class ProjectionViewer:
 
 		planeNormal = normaliseVector(planeNormal)
 
-		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[face.vertices[0]])
-		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[face.vertices[1]])
-		distance3 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[face.vertices[2]])
+		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[0]])
+		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[1]])
+		distance3 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[2]])
 
 		insidePoints = []
 		outsidePoints = []
@@ -182,19 +184,19 @@ class ProjectionViewer:
 
 		elif len(insidePoints) == 1:
 			
-			outputPoints.append(wireframe.perspectiveNodes[insidePoints[0]])
-			outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[insidePoints[0]], wireframe.perspectiveNodes[outsidePoints[0]]))
-			outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[insidePoints[0]], wireframe.perspectiveNodes[outsidePoints[1]]))
+			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
+			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[1]])))
 
 		elif len(insidePoints) == 2:
 
-			outputPoints.append(wireframe.perspectiveNodes[insidePoints[0]])
-			outputPoints.append(wireframe.perspectiveNodes[insidePoints[1]])
-			outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[insidePoints[0]], wireframe.perspectiveNodes[outsidePoints[0]]))
-
-			outputPoints.append(wireframe.perspectiveNodes[insidePoints[1]])
-			outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[insidePoints[1]], wireframe.perspectiveNodes[outsidePoints[0]]))
-			outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.perspectiveNodes[insidePoints[0]], wireframe.perspectiveNodes[outsidePoints[0]]))
+			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
+			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
+			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+			
+			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
+			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[1]], wireframe.nodes[outsidePoints[0]])))
+			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
 
 		elif len(insidePoints) == 3:
 			
@@ -203,6 +205,19 @@ class ProjectionViewer:
 			outputPoints.append(wireframe.perspectiveNodes[insidePoints[2]])
 
 		return outputPoints
+
+	def addPerspectiveToNode(self, node):
+
+		perspectiveNode = node.copy()
+		pNode = perspectiveNode
+		center = [self.width/2, self.height/2]
+
+		if (self.camera.zoom-node[2]) != 0:
+			pNode[0] = (center[0] + (node[0]-center[0])*self.camera.fieldOfView/(self.camera.zoom-(node[2])))
+			pNode[1] = (center[1] + (node[1]-center[1])*self.camera.fieldOfView/(self.camera.zoom-(node[2])))
+			pNode[2] = node[2] * 1
+
+		return pNode
 
 	def distanceOfPointToPlane(self, pointOnPlane, planeNormal, point):
 
