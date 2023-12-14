@@ -82,9 +82,7 @@ class ProjectionViewer:
 
 		for face in wireframe.faces:
 
-			print(200-self.camera.position[2])
-
-			outputPoints = self.clipFaceAgainstPlane([0,0,500], [0,0,1], face, wireframe)
+			outputPoints = self.clipFaceAgainstPlane([0,0,400], [0,0,1], face, wireframe)
 
 			if len(outputPoints) == 3:
 
@@ -236,8 +234,8 @@ class ProjectionViewer:
  		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),
  		pygame.K_UP:   (lambda x: x.moveCameraVertically(-20)),
 
- 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -20)),
- 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', 20)),
+ 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -10)),
+ 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', 10)),
  		pygame.K_a: (lambda x: x.moveCameraHorizontally('X', -20)),
  		pygame.K_d: (lambda x: x.moveCameraHorizontally('X', 20)),
 
