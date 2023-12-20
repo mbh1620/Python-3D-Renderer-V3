@@ -13,14 +13,8 @@ centerPoint = Wireframe()
 centerPoint.addNodes([[0,0,0]])
 
 projectionViewer1 = ProjectionViewer(1200,1000, centerPoint)
-
-axis1 = axisGenerator(500)
-
-# cube3 = cubeGenerator([0,0,0], 1000)
 	
 projectionViewer1.addWireframe('centerPoint', centerPoint)
-
-projectionViewer1.addWireframe('axis1', axis1)
 
 object1 = FileWriteReader("./smallCity.obj", 100)
 

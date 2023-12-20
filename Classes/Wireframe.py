@@ -27,12 +27,19 @@ class Wireframe:
 	def addEdges(self, edgeList):
 		self.edges += edgeList
 
+	def sortFaces(self):
+		self.faces.sort(key=self.sortKey, reverse=True)
+
+	def sortKey(self, inputs):
+		return (self.perspectiveNodes[inputs.vertices[0]][2] + self.perspectiveNodes[inputs.vertices[1]][2] + self.perspectiveNodes[inputs.vertices[2]][2])/3.0
+
 	def transform(self, matrix):
 		self.nodes = np.dot(self.nodes, matrix)
 
 	def transformForPerspective(self, center, fieldOfView, zoom):
 
 		self.perspectiveNodes = self.nodes.copy()
+
 		for i in range(len(self.nodes)):
 
 			node = self.nodes[i]

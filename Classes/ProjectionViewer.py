@@ -66,7 +66,7 @@ class ProjectionViewer:
 
 		for node in wireframe.perspectiveNodes:
 
-			if self.checkNode(node, wireframe):
+			if self.clipNodeAgainstPlane([0,0,400], [0,0,1], node) == True:
 
 				pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
 
@@ -74,9 +74,7 @@ class ProjectionViewer:
 
 		for edge in wireframe.edges:
 
-			if self.checkEdge(edge, wireframe):
-
-				pygame.draw.aaline(self.screen, wireframe.edgeColour, wireframe.perspectiveNodes[edge.node1Index][:2], wireframe.perspectiveNodes[edge.node2Index][:2], 1)
+			pygame.draw.aaline(self.screen, wireframe.edgeColour, wireframe.perspectiveNodes[edge.node1Index][:2], wireframe.perspectiveNodes[edge.node2Index][:2], 1)
 
 	def displayFaces(self, wireframe):
 
@@ -86,44 +84,19 @@ class ProjectionViewer:
 
 			if len(outputPoints) == 3:
 
-				pygame.draw.polygon(self.screen, (0,255,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
+				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
+
+					pygame.draw.polygon(self.screen, (0,255,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
 
 			elif len(outputPoints) == 6:
 				
-				pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
-				pygame.draw.polygon(self.screen, (0,0,255), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
+				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
-	def checkNode(self, node, wireframe):
+					pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
 
-		if self.camera.zoom-node[2] < 0:
+				if self.backFaceCull(outputPoints[3], outputPoints[4], outputPoints[5]):
 
-			return True
-
-		else:
-
-			return False
-
-	def checkEdge(self, edge, wireframe):
-
-		if self.camera.zoom - wireframe.perspectiveNodes[edge.node1Index][2] < 0 and self.camera.zoom - wireframe.perspectiveNodes[edge.node2Index][2] < 0:
-
-			return True
-
-		else:
-
-			return False
-
-	def checkFace(self, face, wireframe):
-
-		n1, n2, n3 = face.vertices
-
-		if self.camera.zoom - wireframe.perspectiveNodes[n1][2] < 0 and self.camera.zoom - wireframe.perspectiveNodes[n2][2] < 0 and self.camera.zoom - wireframe.perspectiveNodes[n3][2]:
-
-			return True
-
-		else:
-
-			return False
+					pygame.draw.polygon(self.screen, (0,0,255), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
 
 	def checkLineOnPlane(self, pointOnPlane, planeNormal, lineStart, lineEnd):
 
@@ -139,6 +112,20 @@ class ProjectionViewer:
 		lineToIntersect = vectorMultiply(lineStartToEnd, t)
 
 		return vectorAdd(lineStart, lineToIntersect)
+
+	def clipNodeAgainstPlane(self, pointOnPlane, planeNormal, node):
+
+		if self.distanceOfPointToPlane(pointOnPlane, planeNormal, node) > 0:
+
+			return True
+
+		else: 
+
+			return False
+
+	def clipEdgeAgainstPlane(self, pointOnPlane, planeNormal, edge, wireframe):
+
+		pass
 
 	def clipFaceAgainstPlane(self, pointOnPlane, planeNormal, face, wireframe):
 
@@ -211,11 +198,21 @@ class ProjectionViewer:
 		center = [self.width/2, self.height/2]
 
 		if (self.camera.zoom-node[2]) != 0:
+
 			pNode[0] = (center[0] + (node[0]-center[0])*self.camera.fieldOfView/(self.camera.zoom-(node[2])))
 			pNode[1] = (center[1] + (node[1]-center[1])*self.camera.fieldOfView/(self.camera.zoom-(node[2])))
 			pNode[2] = node[2] * 1
 
 		return pNode
+
+	def backFaceCull(self, n1, n2, n3):
+
+		output = ((n1[0] * n2[1]) + (n2[0]* n3[1]) + (n3[0] * n1[1])) - ((n3[0] * n2[1]) + (n2[0] * n1[1]) + (n1[0] * n3[1]))
+
+		if output > 0:
+			return False
+		else: 
+			return True
 
 	def distanceOfPointToPlane(self, pointOnPlane, planeNormal, point):
 
