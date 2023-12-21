@@ -43,9 +43,6 @@ class ProjectionViewer:
 			self.processKeys(keys)
 			self.display()
 
-			# print(self.camera.position)
-			# print(self.wireframes['cubeWireframe3'].nodes[0][2])
-
 			pygame.display.flip()
 
 	def display(self):
@@ -136,13 +133,14 @@ class ProjectionViewer:
 		distance3 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[face.vertices[2]])
 
 		insidePoints = []
+		insidePointsDict = {'d1':False, 'd2':False, 'd3':False}
 		outsidePoints = []
-
 		outputPoints = []
 
 		if distance1 > 0:
 
 			insidePoints.append(face.vertices[0])
+			insidePointsDict['d1'] = True
 
 		else:
 
@@ -151,6 +149,7 @@ class ProjectionViewer:
 		if distance2 > 0:
 
 			insidePoints.append(face.vertices[1])
+			insidePointsDict['d2'] = True
 
 		else:
 
@@ -159,6 +158,7 @@ class ProjectionViewer:
 		if distance3 > 0:
 
 			insidePoints.append(face.vertices[2])
+			insidePointsDict['d3'] = True
 
 		else:
 
@@ -169,19 +169,40 @@ class ProjectionViewer:
 
 		elif len(insidePoints) == 1:
 			
-			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
-			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
-			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[1]])))
+			if insidePointsDict['d2'] == True:
+
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[1]])))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+
+			else:
+
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[1]])))
 
 		elif len(insidePoints) == 2:
 
-			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
-			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
-			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+			if insidePointsDict['d2'] == False:
+
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
+
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[1]], wireframe.nodes[outsidePoints[0]])))
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+				
+
+			else:
+
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[0]]))
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
 			
-			outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
-			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[1]], wireframe.nodes[outsidePoints[0]])))
-			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
+				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[1]], wireframe.nodes[outsidePoints[0]])))
+				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
 
 		elif len(insidePoints) == 3:
 			

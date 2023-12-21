@@ -36,7 +36,7 @@ def cubeGenerator(position, size):
 			 Face([6,2,3], [0,0,0], []),
 			 Face([7,6,3], [0,0,0], [])]
 			 
-	cubeWireframe.addEdges(edges)
+	# cubeWireframe.addEdges(edges)
 	cubeWireframe.addFaces(faces)
 
 	return cubeWireframe
