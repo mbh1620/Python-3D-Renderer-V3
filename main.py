@@ -16,14 +16,10 @@ projectionViewer1 = ProjectionViewer(1200,1000, centerPoint)
 	
 projectionViewer1.addWireframe('centerPoint', centerPoint)
 
-object1 = FileWriteReader("./blenderCube.obj", 1000)
+object1 = FileWriteReader("./smallCity.obj", 1000)
 
 objwireframe = object1.createWireframe()
 
-cube1 = cubeGenerator([2000,-1000,0], 2000)
-
-projectionViewer1.addWireframe('cube', objwireframe)
-
-projectionViewer1.addWireframe('cube2', cube1)
+projectionViewer1.addWireframe('cube2', objwireframe)
 
 projectionViewer1.run()

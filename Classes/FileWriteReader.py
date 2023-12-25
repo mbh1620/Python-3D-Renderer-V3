@@ -14,30 +14,23 @@ class FileWriteReader:
 
 		self.processFile()
 
-
 	def processFile(self):
-
-		#Work out the file type
 
 		fileType = self.filename.split('.')[-1]
 
 		f = open(self.filename, "r")
 
-		print(f)
-
 		for i in f:
 
 			if i[0] == 'v' and i[1] == 't':
-				#
+				
 				pass
 
 			elif i[0] == 'v' and i[1] == 'n':
-				#Process the vertex normal
+				
 				pass
 
 			elif i[0] == 'v' and i[1] == ' ':
-
-				#Create a node
 
 				i = i.split()
 
@@ -55,10 +48,9 @@ class FileWriteReader:
 						face.append(subsections[0])
 
 				if len(face) == 4:
-					#reduce the quad down into two triangles
+					
 					triangle1 = Face((int(face[0])-1, int(face[1])-1, int(face[2])-1), [0,0,0], [])
 					triangle2 = Face((int(face[2])-1, int(face[3])-1, int(face[0])-1), [0,0,0], [])
-
 
 					self.faceArray.append(triangle1)
 					self.faceArray.append(triangle2)

@@ -38,3 +38,13 @@ def vectorMultiply(vector, scalar):
 	output[2] = vector[2] * scalar
 
 	return output
+
+def sortFaces(trianglePointsList):
+	
+	trianglePointsList.sort(key=sortKey, reverse=True)
+
+def sortKey(inputs):
+
+	return (inputs[0][2] + inputs[1][2] + inputs[2][2])/3.0
+
+

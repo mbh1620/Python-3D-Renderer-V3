@@ -10,6 +10,8 @@ from Functions.normaliseVector import vectorSubtract
 from Functions.normaliseVector import crossProduct
 from Functions.normaliseVector import vectorMultiply
 from Functions.normaliseVector import vectorAdd
+from Functions.normaliseVector import sortFaces
+
 
 class ProjectionViewer:
 
@@ -75,6 +77,8 @@ class ProjectionViewer:
 
 	def displayFaces(self, wireframe):
 
+		trianglePoints = []
+
 		for face in wireframe.faces:
 
 			outputPoints = self.clipFaceAgainstPlane([0,0,400], [0,0,1], face, wireframe)
@@ -83,17 +87,23 @@ class ProjectionViewer:
 
 				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
-					pygame.draw.polygon(self.screen, (0,255,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
+					trianglePoints.append([outputPoints[0], outputPoints[1], outputPoints[2]])
 
 			elif len(outputPoints) == 6:
 				
 				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
-					pygame.draw.polygon(self.screen, (255,0,0), [outputPoints[0][:2], outputPoints[1][:2], outputPoints[2][:2]], 0)
+					trianglePoints.append([outputPoints[0], outputPoints[1], outputPoints[2]])
 
 				if self.backFaceCull(outputPoints[3], outputPoints[4], outputPoints[5]):
 
-					pygame.draw.polygon(self.screen, (0,0,255), [outputPoints[3][:2], outputPoints[4][:2], outputPoints[5][:2]], 0)
+					trianglePoints.append([outputPoints[3], outputPoints[4], outputPoints[5]])
+
+		sortFaces(trianglePoints)
+
+		for i in trianglePoints:
+
+			pygame.draw.polygon(self.screen, (255,0,0), [i[0][:2], i[1][:2], i[2][:2]], 0)
 
 	def checkLineOnPlane(self, pointOnPlane, planeNormal, lineStart, lineEnd):
 
@@ -252,8 +262,8 @@ class ProjectionViewer:
  		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),
  		pygame.K_UP:   (lambda x: x.moveCameraVertically(-20)),
 
- 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -10)),
- 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', 10)),
+ 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -20)),
+ 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', 20)),
  		pygame.K_a: (lambda x: x.moveCameraHorizontally('X', -20)),
  		pygame.K_d: (lambda x: x.moveCameraHorizontally('X', 20)),
 
