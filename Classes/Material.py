@@ -5,6 +5,3 @@ class Material:
 
 		self.name = name
 		self.colour = colour
-
-
-

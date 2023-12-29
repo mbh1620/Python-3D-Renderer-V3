@@ -19,9 +19,9 @@ def cubeGenerator(position, size):
 
 	cubeWireframe.addNodes(nodes)
 
-	edges = [Edge(0,1),Edge(1,2),Edge(2,3),Edge(3,0),
-		Edge(4,5), Edge(5,6), Edge(6,7), Edge(7,4),
-		Edge(4,0), Edge(5,1), Edge(6,2), Edge(7,3)]
+	edges = [[0,1],[1,2],[2,3],[3,0],
+		[4,5], [5,6], [6,7], [7,4],
+		[4,0], [5,1], [6,2], [7,3]]
 
 	faces = [Face([0,2,1], [0,0,0], []),
 			 Face([0,3,2], [0,0,0], []),
@@ -36,7 +36,7 @@ def cubeGenerator(position, size):
 			 Face([6,2,3], [0,0,0], []),
 			 Face([7,6,3], [0,0,0], [])]
 			 
-	# cubeWireframe.addEdges(edges)
+	cubeWireframe.addEdges(edges)
 	cubeWireframe.addFaces(faces)
 
 	return cubeWireframe

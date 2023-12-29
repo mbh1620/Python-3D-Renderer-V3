@@ -12,6 +12,8 @@ class FileWriteReader:
 		self.nodeArray = []
 		self.faceArray = []
 
+		self.materialDictionary = {}
+
 		self.processFile()
 
 	def processFile(self):
@@ -66,6 +68,30 @@ class FileWriteReader:
 
 		f.close()
 
+		self.processMaterialFile(self.filename[:-3]+'mtl')
+
+	def processMaterialFile(self, mtlFileName):
+
+		f = open(mtlFileName, 'r')
+
+		for i in f:
+			
+			if i.find('newmtl') == 0:
+				
+				i = i.split(' ')
+				materialName = i[-1]
+
+			if i[0] == 'K' and i[1] =='d':
+				
+				i = i.split(' ')
+				r = float(i[1])*255
+				g = float(i[2])*255
+				b = float(i[3])*255
+
+				self.materialDictionary[materialName] = (r,g,b)
+
+		f.close()
+
 	def createWireframe(self):
 
 		Object = Wireframe()
@@ -76,9 +102,4 @@ class FileWriteReader:
 			Object.addFaces([i])
 
 		return Object
-
-
-
-
-
 

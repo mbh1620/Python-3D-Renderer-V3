@@ -12,7 +12,6 @@ from Functions.normaliseVector import vectorMultiply
 from Functions.normaliseVector import vectorAdd
 from Functions.normaliseVector import sortFaces
 
-
 class ProjectionViewer:
 
 	def __init__(self, width, height, centerPoint):
@@ -26,6 +25,7 @@ class ProjectionViewer:
 		self.camera = Camera([0,0,0],0,0)
 		self.centerPoint = centerPoint
 
+		self.lights = []
 		self.wireframes = {}
 
 		pygame.init()
@@ -65,7 +65,7 @@ class ProjectionViewer:
 
 		for node in wireframe.perspectiveNodes:
 
-			if self.clipNodeAgainstPlane([0,0,400], [0,0,1], node) == True:
+			if self.clipNodeAgainstPlane([0,0,800], [0,0,1], node) == True:
 
 				pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
 
@@ -73,37 +73,57 @@ class ProjectionViewer:
 
 		for edge in wireframe.edges:
 
-			pygame.draw.aaline(self.screen, wireframe.edgeColour, wireframe.perspectiveNodes[edge.node1Index][:2], wireframe.perspectiveNodes[edge.node2Index][:2], 1)
+			outputPoints = self.clipEdgeAgainstPlane([0,0,800], [0,0,1], edge, wireframe)
+
+			if len(outputPoints) == 2:
+
+				pygame.draw.aaline(self.screen, wireframe.edgeColour, outputPoints[0][:2], outputPoints[1][:2], 1)
 
 	def displayFaces(self, wireframe):
 
 		trianglePoints = []
+		shading = []
 
 		for face in wireframe.faces:
 
-			outputPoints = self.clipFaceAgainstPlane([0,0,400], [0,0,1], face, wireframe)
+			outputPoints = self.clipFaceAgainstPlane([0,0,800], [0,0,1], face, wireframe)
 
 			if len(outputPoints) == 3:
 
 				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
 					trianglePoints.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+					shading.append(self.calculateShading(face))
 
 			elif len(outputPoints) == 6:
 				
 				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
 					trianglePoints.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+					shading.append(self.calculateShading(face))
 
 				if self.backFaceCull(outputPoints[3], outputPoints[4], outputPoints[5]):
 
 					trianglePoints.append([outputPoints[3], outputPoints[4], outputPoints[5]])
+					shading.append(self.calculateShading(face))
 
 		sortFaces(trianglePoints)
 
 		for i in trianglePoints:
 
-			pygame.draw.polygon(self.screen, (255,0,0), [i[0][:2], i[1][:2], i[2][:2]], 0)
+			pygame.draw.polygon(self.screen, (255,255,255), [i[0][:2], i[1][:2], i[2][:2]], 0)
+
+	def calculateShading(self, face):
+
+		#For all the lights in the world, calculate the shading on the face
+
+		shadedColour = [255,255,255]
+
+		for i in self.lights:
+
+			print(i.position)
+
+		return shadedColour
 
 	def checkLineOnPlane(self, pointOnPlane, planeNormal, lineStart, lineEnd):
 
@@ -132,7 +152,48 @@ class ProjectionViewer:
 
 	def clipEdgeAgainstPlane(self, pointOnPlane, planeNormal, edge, wireframe):
 
-		pass
+		planeNormal = normaliseVector(planeNormal)
+
+		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[edge[0]])
+		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, wireframe.nodes[edge[1]])
+
+		insidePoints = []
+		insidePointsDict = {'d1':False, 'd2':False}
+		outsidePoints = []
+		outputPoints = []
+
+		if distance1 > 0:
+
+			insidePoints.append(wireframe.nodes[edge[0]])
+			insidePointsDict['d1'] = True
+
+		else:
+
+			outsidePoints.append(wireframe.nodes[edge[0]])
+
+		if distance2 > 0:
+
+			insidePoints.append(wireframe.nodes[edge[1]])
+			insidePointsDict['d2'] = True
+
+		else:
+
+			outsidePoints.append(wireframe.nodes[edge[1]])
+
+		if len(insidePoints) == 2:
+			
+			outputPoints.append(wireframe.perspectiveNodes[edge[0]])
+			outputPoints.append(wireframe.perspectiveNodes[edge[1]])
+
+		elif len(insidePoints) == 1:
+
+			outputPoints.append(self.addPerspectiveToNode(insidePoints[0]))
+			outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0])))
+
+		elif len(insidePoints) == 0:
+			pass
+
+		return outputPoints
 
 	def clipFaceAgainstPlane(self, pointOnPlane, planeNormal, face, wireframe):
 
@@ -202,7 +263,6 @@ class ProjectionViewer:
 				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[1]], wireframe.nodes[outsidePoints[0]])))
 				outputPoints.append(self.addPerspectiveToNode(wireframe.nodes[insidePoints[1]]))
 				outputPoints.append(self.addPerspectiveToNode(self.checkLineOnPlane(pointOnPlane, planeNormal, wireframe.nodes[insidePoints[0]], wireframe.nodes[outsidePoints[0]])))
-				
 
 			else:
 
@@ -253,6 +313,10 @@ class ProjectionViewer:
 		
 		self.wireframes[name] = wireframe
 
+	def addLight(self, light):
+
+		self.lights.append(light)
+
 	def processKeys(self, keys):
 
 		key_to_function = {
@@ -294,8 +358,8 @@ class ProjectionViewer:
 			wireframe.transform(matrix)
 
 	def rotateAboutCamera(self, axis, theta):
+		
 		wf = Wireframe()
-
 		matrix = wf.translationMatrix(-self.width/2, -self.height/2,0)
 
 		for wireframe in self.wireframes.values():
