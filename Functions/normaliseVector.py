@@ -1,6 +1,5 @@
 import math
 
-
 def normaliseVector(vector):
 
 	magnitude = math.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
@@ -39,6 +38,16 @@ def vectorMultiply(vector, scalar):
 
 	return output
 
+def vectorDivide(vector, scalar):
+
+	output = [None, None, None]
+
+	output[0] = vector[0] / scalar
+	output[1] = vector[1] / scalar
+	output[2] = vector[2] / scalar
+
+	return output
+
 def sortFaces(trianglePointsList):
 	
 	trianglePointsList.sort(key=sortKey, reverse=True)
@@ -46,5 +55,41 @@ def sortFaces(trianglePointsList):
 def sortKey(inputs):
 
 	return (inputs[0][2] + inputs[1][2] + inputs[2][2])/3.0
+
+def calculateTriangleCenter(n1, n2, n3):
+
+	center = vectorDivide(vectorAdd(vectorAdd(n1, n2), n3), 3.0)
+
+	return center
+
+def calculateFaceNormal(n1, n2, n3):
+
+	faceNormal = [None, None, None]
+
+	vectorU = vectorSubtract(n2, n1)
+	vectorV = vectorSubtract(n3, n1)
+
+	faceNormal = crossProduct(vectorU, vectorV)
+	faceNormal = normaliseVector(faceNormal)
+
+	return faceNormal
+
+def getFaceNormal(vertexNormalA, vertexNormalB, vertexNormalC):
+
+	averagedVertexNormal = calculateTriangleCenter(vertexNormalA, vertexNormalB, vertexNormalC)
+
+	averagedVertexNormalX = averagedVertexNormal[0]
+	averagedVertexNormalY = averagedVertexNormal[1]
+	averagedVertexNormalZ = averagedVertexNormal[2]
+
+	denominator = math.sqrt((averagedVertexNormalX**2) + (averagedVertexNormalY**2) + (averagedVertexNormalZ**2))
+
+	averagedVertexNormal = vectorDivide(averagedVertexNormal, denominator)
+
+	return averagedVertexNormal
+
+def clamp(value, minValue, maxValue):
+		return max(min(value, maxValue), minValue)
+
 
 

@@ -17,12 +17,8 @@ projectionViewer1 = ProjectionViewer(1200,1000, centerPoint)
 	
 projectionViewer1.addWireframe('centerPoint', centerPoint)
 
-# cube1 = cubeGenerator([0,0,0], 1000)
+projectionViewer1.openFile('./blenderCube.obj', 1000)
 
-object1 = FileWriteReader("./teapot.obj", 1000)
-
-objwireframe = object1.createWireframe()
-
-projectionViewer1.addWireframe('teapot', objwireframe)
+projectionViewer1.wireframes['./blenderCube.obj2'].displayNodes = False
 
 projectionViewer1.run()

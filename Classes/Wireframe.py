@@ -8,9 +8,15 @@ class Wireframe:
 		self.nodes = np.zeros((0,4))
 		self.edges = []
 		self.faces = []
+		self.materials = {}
+
+		self.displayNodes = True
+		self.displayEdges = True
+		self.displayFaces = True
 
 		self.nodeRadius = 3
 		self.nodeColour = (255,255,255)
+		self.colour = (255,255,255)
 
 		self.edgeWidth = 1
 		self.edgeColour = (255,255,255)

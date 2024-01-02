@@ -1,16 +1,23 @@
 
 import pygame
 import numpy as np
+import math
 from Classes.Face import Face
 from Classes.Camera import Camera
 from Classes.Wireframe import Wireframe
+from Classes.Light import Light
+from Classes.FileWriteReader import FileWriteReader
 from Functions.normaliseVector import normaliseVector
 from Functions.normaliseVector import dotProduct
 from Functions.normaliseVector import vectorSubtract
 from Functions.normaliseVector import crossProduct
 from Functions.normaliseVector import vectorMultiply
 from Functions.normaliseVector import vectorAdd
+from Functions.normaliseVector import vectorDivide
 from Functions.normaliseVector import sortFaces
+from Functions.normaliseVector import calculateTriangleCenter
+from Functions.normaliseVector import calculateFaceNormal
+from Functions.normaliseVector import clamp
 
 class ProjectionViewer:
 
@@ -27,8 +34,17 @@ class ProjectionViewer:
 
 		self.lights = []
 		self.wireframes = {}
+		self.materials = {}
+
+		self.initialise()
 
 		pygame.init()
+
+	def initialise(self):
+
+		light1 = Light([4000, 2000, 0])
+
+		self.addLight(light1)
 
 	def run(self):
 
@@ -63,65 +79,73 @@ class ProjectionViewer:
 
 	def displayNodes(self, wireframe):
 
-		for node in wireframe.perspectiveNodes:
+		if wireframe.displayNodes:
 
-			if self.clipNodeAgainstPlane([0,0,800], [0,0,1], node) == True:
+			for node in wireframe.perspectiveNodes:
 
-				pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
+				if self.clipNodeAgainstPlane([0,0,400], [0,0,1], node) == True:
+
+					pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
 
 	def displayEdges(self, wireframe):
 
-		for edge in wireframe.edges:
+		if wireframe.displayEdges:
 
-			outputPoints = self.clipEdgeAgainstPlane([0,0,800], [0,0,1], edge, wireframe)
+			for edge in wireframe.edges:
 
-			if len(outputPoints) == 2:
+				outputPoints = self.clipEdgeAgainstPlane([0,0,400], [0,0,1], edge, wireframe)
 
-				pygame.draw.aaline(self.screen, wireframe.edgeColour, outputPoints[0][:2], outputPoints[1][:2], 1)
+				if len(outputPoints) == 2:
+
+					pygame.draw.aaline(self.screen, wireframe.edgeColour, outputPoints[0][:2], outputPoints[1][:2], 1)
 
 	def displayFaces(self, wireframe):
 
-		trianglePoints = []
+		triangles = []
 		shading = []
 
-		for face in wireframe.faces:
+		if wireframe.displayFaces:
 
-			outputPoints = self.clipFaceAgainstPlane([0,0,800], [0,0,1], face, wireframe)
+			for face in wireframe.faces:
 
-			if len(outputPoints) == 3:
+				baseColour = face.material
 
-				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
+				outputPoints = self.clipFaceAgainstPlane([0,0,400], [0,0,1], face, wireframe)
 
-					trianglePoints.append([outputPoints[0], outputPoints[1], outputPoints[2]])
-					shading.append(self.calculateShading(face))
+				if len(outputPoints) == 3:
 
-			elif len(outputPoints) == 6:
+					if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
+
+						triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+						shading.append(self.calculateShading(face, wireframe, baseColour))
+
+				elif len(outputPoints) == 6:
 				
-				if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
+					if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
-					trianglePoints.append([outputPoints[0], outputPoints[1], outputPoints[2]])
-					shading.append(self.calculateShading(face))
+						triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+						shading.append(self.calculateShading(face, wireframe, baseColour))
 
-				if self.backFaceCull(outputPoints[3], outputPoints[4], outputPoints[5]):
+					if self.backFaceCull(outputPoints[3], outputPoints[4], outputPoints[5]):
 
-					trianglePoints.append([outputPoints[3], outputPoints[4], outputPoints[5]])
-					shading.append(self.calculateShading(face))
+						triangles.append([outputPoints[3], outputPoints[4], outputPoints[5]])
+						shading.append(self.calculateShading(face, wireframe, baseColour))
 
-		sortFaces(trianglePoints)
+			sortFaces(triangles)
 
-		for i in trianglePoints:
+			j = 0
 
-			pygame.draw.polygon(self.screen, (255,255,255), [i[0][:2], i[1][:2], i[2][:2]], 0)
+			for i in triangles:
 
-	def calculateShading(self, face):
+				pygame.draw.polygon(self.screen, shading[j], [i[0][:2], i[1][:2], i[2][:2]], 0)
+				
+				j+=1
 
-		#For all the lights in the world, calculate the shading on the face
+	def calculateShading(self, face, wireframe, baseColour):
 
-		shadedColour = [255,255,255]
+		shadedColour = [0,0,0]
 
-		for i in self.lights:
-
-			print(i.position)
+		faceCenter = calculateTriangleCenter(wireframe.nodes[face.vertices[0]], wireframe.nodes[face.vertices[1]], wireframe.nodes[face.vertices[2]])
 
 		return shadedColour
 
@@ -315,7 +339,23 @@ class ProjectionViewer:
 
 	def addLight(self, light):
 
-		self.lights.append(light)
+		wireframe = Wireframe()
+
+		wireframe.addNodes(np.array([[light.position[0],light.position[1],light.position[2]]]))
+
+		wireframe.nodeColour = (0, 255, 0)
+
+		self.lights.append('Light'+str(len(self.lights)))
+
+		self.addWireframe('Light'+str(len(self.lights)-1), wireframe)
+
+	def openFile(self, fileName, scaleFactor):
+
+		tempFile = FileWriteReader(fileName, scaleFactor)
+
+		wireframe = tempFile.createWireframe()
+
+		self.addWireframe(fileName+str(len(self.wireframes)), wireframe)
 
 	def processKeys(self, keys):
 
