@@ -1,4 +1,3 @@
-
 import pygame
 import numpy as np
 import math
@@ -102,7 +101,6 @@ class ProjectionViewer:
 	def displayFaces(self, wireframe):
 
 		triangles = []
-		shading = []
 
 		if wireframe.displayFaces:
 
@@ -117,35 +115,43 @@ class ProjectionViewer:
 					if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
 						triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
-						shading.append(self.calculateShading(face, wireframe, baseColour))
 
 				elif len(outputPoints) == 6:
 				
 					if self.backFaceCull(outputPoints[0], outputPoints[1], outputPoints[2]):
 
 						triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
-						shading.append(self.calculateShading(face, wireframe, baseColour))
 
 					if self.backFaceCull(outputPoints[3], outputPoints[4], outputPoints[5]):
 
 						triangles.append([outputPoints[3], outputPoints[4], outputPoints[5]])
-						shading.append(self.calculateShading(face, wireframe, baseColour))
 
-			sortFaces(triangles)
+				sortFaces(triangles)
 
 			j = 0
 
 			for i in triangles:
 
-				pygame.draw.polygon(self.screen, shading[j], [i[0][:2], i[1][:2], i[2][:2]], 0)
+				shading = self.calculateShading([i[0], i[1], i[2]], wireframe, baseColour)
+
+				pygame.draw.polygon(self.screen, shading, [i[0][:2], i[1][:2], i[2][:2]], 0)
 				
 				j+=1
 
-	def calculateShading(self, face, wireframe, baseColour):
+	def calculateShading(self, trianglePoints, wireframe, baseColour):
 
 		shadedColour = [0,0,0]
 
-		faceCenter = calculateTriangleCenter(wireframe.nodes[face.vertices[0]], wireframe.nodes[face.vertices[1]], wireframe.nodes[face.vertices[2]])
+		faceCenter = calculateTriangleCenter(trianglePoints[0], trianglePoints[1], trianglePoints[2])
+
+		triangleNormal = calculateFaceNormal(trianglePoints[0], trianglePoints[1], trianglePoints[2])
+
+		directionVector = normaliseVector(vectorSubtract(self.wireframes['Light0'].nodes[0], faceCenter))
+
+
+		cosTheta = clamp(dotProduct(directionVector, triangleNormal), 0, 1)
+
+		shadedColour = [clamp(cosTheta*255, 0, 255), clamp(cosTheta*255, 0, 255), clamp(cosTheta*255, 0, 255)]	
 
 		return shadedColour
 

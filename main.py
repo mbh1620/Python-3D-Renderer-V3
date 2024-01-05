@@ -19,6 +19,6 @@ projectionViewer1.addWireframe('centerPoint', centerPoint)
 
 projectionViewer1.openFile('./blenderCube.obj', 1000)
 
-projectionViewer1.wireframes['./blenderCube.obj2'].displayNodes = False
+projectionViewer1.wireframes['./blenderCube.obj2'].displayNodes = True
 
 projectionViewer1.run()
