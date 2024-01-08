@@ -134,11 +134,8 @@ class ProjectionViewer:
 
 				shading = self.calculateShading([i[0], i[1], i[2]], wireframe, baseColour)
 
-				iPerspective = [None, None, None]
-				iPerspective[0] = self.addPerspectiveToNode(i[0]) 
-				iPerspective[1] = self.addPerspectiveToNode(i[1])
-				iPerspective[2] = self.addPerspectiveToNode(i[2])
-
+				iPerspective = [self.addPerspectiveToNode(i[0]), self.addPerspectiveToNode(i[1]), self.addPerspectiveToNode(i[2])]
+				
 				pygame.draw.polygon(self.screen, shading, [iPerspective[0][:2], iPerspective[1][:2], iPerspective[2][:2]], 0)
 				
 				j+=1
