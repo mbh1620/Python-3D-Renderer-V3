@@ -4,7 +4,13 @@ def normaliseVector(vector):
 
 	magnitude = math.sqrt((vector[0]**2)+(vector[1]**2)+(vector[2]**2))
 
-	return [vector[0]/magnitude, vector[1]/magnitude, vector[2]/magnitude]
+	if magnitude == 0:
+
+		return [0,0,0]
+
+	else:
+
+		return vectorDivide(vector, magnitude)
 
 def dotProduct(vector1, vector2):
 
@@ -54,7 +60,7 @@ def sortFaces(trianglePointsList):
 
 def sortKey(inputs):
 
-	return (inputs[0][2] + inputs[1][2] + inputs[2][2])/3.0
+	return (addPerspectiveToNode(inputs[0])[2] + addPerspectiveToNode(inputs[1])[2] + addPerspectiveToNode(inputs[2])[2])/3.0
 
 def calculateTriangleCenter(n1, n2, n3):
 
@@ -74,22 +80,22 @@ def calculateFaceNormal(n1, n2, n3):
 
 	return faceNormal
 
-def getFaceNormal(vertexNormalA, vertexNormalB, vertexNormalC):
-
-	averagedVertexNormal = calculateTriangleCenter(vertexNormalA, vertexNormalB, vertexNormalC)
-
-	averagedVertexNormalX = averagedVertexNormal[0]
-	averagedVertexNormalY = averagedVertexNormal[1]
-	averagedVertexNormalZ = averagedVertexNormal[2]
-
-	denominator = math.sqrt((averagedVertexNormalX**2) + (averagedVertexNormalY**2) + (averagedVertexNormalZ**2))
-
-	averagedVertexNormal = vectorDivide(averagedVertexNormal, denominator)
-
-	return averagedVertexNormal
-
 def clamp(value, minValue, maxValue):
 		return max(min(value, maxValue), minValue)
+
+def addPerspectiveToNode(node):
+
+		perspectiveNode = node.copy()
+		pNode = perspectiveNode
+		center = [1200/2, 1000/2]
+
+		if (250-node[2]) != 0:
+
+			pNode[0] = (center[0] + (node[0]-center[0])*250/(250-(node[2])))
+			pNode[1] = (center[1] + (node[1]-center[1])*250/(250-(node[2])))
+			pNode[2] = node[2] * 1
+
+		return pNode
 
 
 

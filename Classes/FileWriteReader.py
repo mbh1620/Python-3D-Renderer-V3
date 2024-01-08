@@ -1,7 +1,7 @@
 import numpy as np
 from Classes.Face import Face
 from Classes.Wireframe import Wireframe
-from Functions.normaliseVector import getFaceNormal
+from Functions.normaliseVector import calculateFaceNormal
 
 class FileWriteReader:
 
@@ -64,15 +64,15 @@ class FileWriteReader:
 
 				if len(face) == 4:
 					
-					triangle1 = Face((int(face[0])-1, int(face[1])-1, int(face[2])-1), getFaceNormal(self.vertexNormalArray[int(faceVertexNormals[0])-1], self.vertexNormalArray[int(faceVertexNormals[1])-1], self.vertexNormalArray[int(faceVertexNormals[2])-1]), self.materialDictionary[material])
-					triangle2 = Face((int(face[2])-1, int(face[3])-1, int(face[0])-1), getFaceNormal(self.vertexNormalArray[int(faceVertexNormals[2])-1], self.vertexNormalArray[int(faceVertexNormals[3])-1], self.vertexNormalArray[int(faceVertexNormals[0])-1]), self.materialDictionary[material])
+					triangle1 = Face((int(face[0])-1, int(face[1])-1, int(face[2])-1), calculateFaceNormal(self.vertexNormalArray[int(faceVertexNormals[0])-1], self.vertexNormalArray[int(faceVertexNormals[1])-1], self.vertexNormalArray[int(faceVertexNormals[2])-1]), self.materialDictionary[material])
+					triangle2 = Face((int(face[2])-1, int(face[3])-1, int(face[0])-1), calculateFaceNormal(self.vertexNormalArray[int(faceVertexNormals[2])-1], self.vertexNormalArray[int(faceVertexNormals[3])-1], self.vertexNormalArray[int(faceVertexNormals[0])-1]), self.materialDictionary[material])
 
 					self.faceArray.append(triangle1)
 					self.faceArray.append(triangle2)
 
 				elif len(face) == 3:
 
-					triangle1 = Face((int(face[0])-1, int(face[1])-1, int(face[2])-1), getFaceNormal(self.vertexNormalArray[int(faceVertexNormals[0])-1], self.vertexNormalArray[int(faceVertexNormals[1])-1], self.vertexNormalArray[int(faceVertexNormals[2])-1]), self.materialDictionary[material])
+					triangle1 = Face((int(face[0])-1, int(face[1])-1, int(face[2])-1), calculateFaceNormal(self.vertexNormalArray[int(faceVertexNormals[0])-1], self.vertexNormalArray[int(faceVertexNormals[1])-1], self.vertexNormalArray[int(faceVertexNormals[2])-1]), self.materialDictionary[material])
 
 					self.faceArray.append(triangle1)
 
