@@ -18,14 +18,12 @@ projectionViewer1 = ProjectionViewer(1200,1000, centerPoint)
 	
 projectionViewer1.addWireframe('centerPoint', centerPoint)
 
-# projectionViewer1.openFile('./blenderCube.obj', 1000)
+projectionViewer1.openFile('./grid.obj', 1000)
 
-# projectionViewer1.wireframes['./blenderCube.obj2'].displayNodes = False
+projectionViewer1.wireframes['./grid.obj2'].displayNodes = False
 
-projectionViewer1.openFile('./blenderCube.obj', 500)
+light2 = Light([5000, 5000, 0], 1, [0.95, 0.85, 0.8])
 
-# plane1 = planeGenerator('X', 0, 1000)
-
-# projectionViewer1.addWireframe('plane1', plane1)
+projectionViewer1.addLight(light2)
 
 projectionViewer1.run()
