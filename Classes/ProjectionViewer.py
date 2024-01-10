@@ -32,6 +32,7 @@ class ProjectionViewer:
 		self.centerPoint = centerPoint
 
 		self.lights = {}
+
 		self.wireframes = {}
 		self.materials = {}
 
@@ -378,7 +379,8 @@ class ProjectionViewer:
 
 		pygame.K_LEFT: (lambda x: x.rotateAboutCamera('Y', 0.05)),
  		pygame.K_RIGHT:(lambda x: x.rotateAboutCamera('Y', -0.05)),
- 		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),  #Default 20
+
+ 		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),
  		pygame.K_UP:   (lambda x: x.moveCameraVertically(-20)),
 
  		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -20)),
