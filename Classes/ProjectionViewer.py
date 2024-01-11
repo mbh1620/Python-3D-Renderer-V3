@@ -28,7 +28,7 @@ class ProjectionViewer:
 		pygame.display.set_caption('3D Renderer')
 
 		self.backgroundColour = (10,10,50)
-		self.camera = Camera([0,0,0],0,0)
+		self.camera = Camera([0,0,0],0,0, self)
 		self.centerPoint = centerPoint
 
 		self.lights = {}
@@ -42,7 +42,7 @@ class ProjectionViewer:
 
 	def initialise(self):
 
-		light1 = Light([0,2000,0], 1, [1,1,1])
+		light1 = Light([200,200,200], 1, [1,1,1])
 
 		self.addLight(light1)
 
@@ -377,16 +377,16 @@ class ProjectionViewer:
 
 		key_to_function = {
 
-		pygame.K_LEFT: (lambda x: x.rotateAboutCamera('Y', 0.05)),
- 		pygame.K_RIGHT:(lambda x: x.rotateAboutCamera('Y', -0.05)),
+		pygame.K_LEFT: (lambda x: x.camera.LEFT()),
+ 		pygame.K_RIGHT:(lambda x: x.camera.RIGHT()),
 
- 		pygame.K_DOWN: (lambda x: x.moveCameraVertically(20)),
- 		pygame.K_UP:   (lambda x: x.moveCameraVertically(-20)),
+ 		pygame.K_DOWN: (lambda x: x.camera.DOWN()),
+ 		pygame.K_UP:   (lambda x: x.camera.UP()),
 
- 		pygame.K_w: (lambda x: x.moveCameraHorizontally('Z', -20)),
- 		pygame.K_s: (lambda x: x.moveCameraHorizontally('Z', 20)),
- 		pygame.K_a: (lambda x: x.moveCameraHorizontally('X', -20)),
- 		pygame.K_d: (lambda x: x.moveCameraHorizontally('X', 20)),
+ 		pygame.K_w: (lambda x: x.camera.W()),
+ 		pygame.K_s: (lambda x: x.camera.S()),
+ 		pygame.K_a: (lambda x: x.camera.A()),
+ 		pygame.K_d: (lambda x: x.camera.D()),
 
 		}
 
