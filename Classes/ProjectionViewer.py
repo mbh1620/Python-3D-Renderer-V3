@@ -36,6 +36,9 @@ class ProjectionViewer:
 		self.wireframes = {}
 		self.materials = {}
 
+		self.nearPlaneZ = 400
+		self.farPlaneZ = 5000
+
 		self.initialise()
 
 		pygame.init()
@@ -83,9 +86,10 @@ class ProjectionViewer:
 
 			for node in wireframe.perspectiveNodes:
 
-				if self.clipNodeAgainstPlane([0,0,400], [0,0,1], node) == True:
+				if self.clipNodeAgainstPlane([0,0,self.nearPlaneZ], [0,0,1], node) == True and self.clipNodeAgainstPlane([0,0,self.farPlaneZ], [0,0,-1], node) == True:
 
 					pygame.draw.circle(self.screen, wireframe.nodeColour, (int(node[0]), int(node[1])), wireframe.nodeRadius, 0)
+
 
 	def displayEdges(self, wireframe):
 
@@ -93,11 +97,16 @@ class ProjectionViewer:
 
 			for edge in wireframe.edges:
 
-				outputPoints = self.clipEdgeAgainstPlane([0,0,400], [0,0,1], edge, wireframe)
+				outputPoints = self.clipEdgeAgainstPlane([0,0,self.nearPlaneZ], [0,0,1], edge, wireframe)
 
 				if len(outputPoints) == 2:
 
-					pygame.draw.aaline(self.screen, wireframe.edgeColour, outputPoints[0][:2], outputPoints[1][:2], 1)
+					outputPoints = self.clipEdgePointsAgainstPlane([0,0,self.farPlaneZ], [0,0,-1], [outputPoints[0], outputPoints[1]], wireframe)
+
+					if len(outputPoints) == 2:
+
+						pygame.draw.aaline(self.screen, wireframe.edgeColour, outputPoints[0][:2], outputPoints[1][:2], 1)
+
 
 	def displayFaces(self, wireframe):
 
@@ -109,7 +118,7 @@ class ProjectionViewer:
 
 				baseColour = face.material
 
-				outputPoints = self.clipFaceAgainstPlane([0,0,400], [0,0,1], face, wireframe)
+				outputPoints = self.clipFaceAgainstPlane([0,0,self.nearPlaneZ], [0,0,1], face, wireframe)
 
 				if len(outputPoints) == 3:
 
@@ -222,8 +231,53 @@ class ProjectionViewer:
 
 		if len(insidePoints) == 2:
 			
-			outputPoints.append(wireframe.perspectiveNodes[edge[0]])
-			outputPoints.append(wireframe.perspectiveNodes[edge[1]])
+			outputPoints.append(wireframe.nodes[edge[0]])
+			outputPoints.append(wireframe.nodes[edge[1]])
+
+		elif len(insidePoints) == 1:
+
+			outputPoints.append(insidePoints[0])
+			outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+
+		elif len(insidePoints) == 0:
+			pass
+
+		return outputPoints
+
+	def clipEdgePointsAgainstPlane(self, pointOnPlane, planeNormal, edgePoints, wireframe):
+
+		planeNormal = normaliseVector(planeNormal)
+
+		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, edgePoints[0])
+		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, edgePoints[1])
+
+		insidePoints = []
+		insidePointsDict = {'d1':False, 'd2':False}
+		outsidePoints = []
+		outputPoints = []
+
+		if distance1 > 0:
+
+			insidePoints.append(edgePoints[0])
+			insidePointsDict['d1'] = True
+
+		else:
+
+			outsidePoints.append(edgePoints[0])
+
+		if distance2 > 0:
+
+			insidePoints.append(edgePoints[1])
+			insidePointsDict['d2'] = True
+
+		else:
+
+			outsidePoints.append(edgePoints[1])
+
+		if len(insidePoints) == 2:
+			
+			outputPoints.append(self.addPerspectiveToNode(edgePoints[0]))
+			outputPoints.append(self.addPerspectiveToNode(edgePoints[1]))
 
 		elif len(insidePoints) == 1:
 
