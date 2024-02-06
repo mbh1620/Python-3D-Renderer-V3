@@ -122,21 +122,25 @@ class ProjectionViewer:
 
 				if len(outputPoints) == 3:
 
-					if self.backFaceCull(self.addPerspectiveToNode(outputPoints[0]), self.addPerspectiveToNode(outputPoints[1]), self.addPerspectiveToNode(outputPoints[2])):
+					outputPoints = self.clipFacePointsAgainstPlane([0,0,self.farPlaneZ], [0,0,-1], outputPoints, wireframe)
 
-						triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+					if len(outputPoints) == 3:
 
-				elif len(outputPoints) == 6:
+						if self.backFaceCull(self.addPerspectiveToNode(outputPoints[0]), self.addPerspectiveToNode(outputPoints[1]), self.addPerspectiveToNode(outputPoints[2])):
+
+							triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+
+					elif len(outputPoints) == 6:
 				
-					if self.backFaceCull(self.addPerspectiveToNode(outputPoints[0]), self.addPerspectiveToNode(outputPoints[1]), self.addPerspectiveToNode(outputPoints[2])):
+						if self.backFaceCull(self.addPerspectiveToNode(outputPoints[0]), self.addPerspectiveToNode(outputPoints[1]), self.addPerspectiveToNode(outputPoints[2])):
 
-						triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+							triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
 
-					if self.backFaceCull(self.addPerspectiveToNode(outputPoints[3]), self.addPerspectiveToNode(outputPoints[4]), self.addPerspectiveToNode(outputPoints[5])):
+						if self.backFaceCull(self.addPerspectiveToNode(outputPoints[3]), self.addPerspectiveToNode(outputPoints[4]), self.addPerspectiveToNode(outputPoints[5])):
 
-						triangles.append([outputPoints[3], outputPoints[4], outputPoints[5]])
+							triangles.append([outputPoints[3], outputPoints[4], outputPoints[5]])
 
-			j = 0
+				j = 0
 
 			sortFaces(triangles)
 
@@ -373,6 +377,93 @@ class ProjectionViewer:
 			outputPoints.append(wireframe.nodes[insidePoints[0]])
 			outputPoints.append(wireframe.nodes[insidePoints[1]])
 			outputPoints.append(wireframe.nodes[insidePoints[2]])
+
+		return outputPoints
+
+	def clipFacePointsAgainstPlane(self, pointOnPlane, planeNormal, facePoints, wireframe):
+
+		planeNormal = normaliseVector(planeNormal)
+
+		distance1 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, facePoints[0])
+		distance2 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, facePoints[1])
+		distance3 = self.distanceOfPointToPlane(pointOnPlane, planeNormal, facePoints[2])
+
+		insidePoints = []
+		insidePointsDict = {'d1':False, 'd2':False, 'd3':False}
+		outsidePoints = []
+		outputPoints = []
+
+		if distance1 > 0:
+
+			insidePoints.append(facePoints[0])
+			insidePointsDict['d1'] = True
+
+		else:
+
+			outsidePoints.append(facePoints[0])
+
+		if distance2 > 0:
+
+			insidePoints.append(facePoints[1])
+			insidePointsDict['d2'] = True
+
+		else:
+
+			outsidePoints.append(facePoints[1])
+
+		if distance3 > 0:
+
+			insidePoints.append(facePoints[2])
+			insidePointsDict['d3'] = True
+
+		else:
+
+			outsidePoints.append(facePoints[2])
+
+		if insidePoints == 0:
+			pass
+
+		elif len(insidePoints) == 1:
+			
+			if insidePointsDict['d2'] == True:
+
+				outputPoints.append(insidePoints[0])
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[1]))
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+
+			else:
+
+				outputPoints.append(insidePoints[0])
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[1]))
+
+		elif len(insidePoints) == 2:
+
+			if insidePointsDict['d2'] == False:
+
+				outputPoints.append(insidePoints[0])
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+				outputPoints.append(insidePoints[1])
+
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[1], outsidePoints[0]))
+				outputPoints.append(insidePoints[1])
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+
+			else:
+
+				outputPoints.append(insidePoints[0])
+				outputPoints.append(insidePoints[1])
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+			
+				outputPoints.append(insidePoints[1])
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[1], outsidePoints[0]))
+				outputPoints.append(self.checkLineOnPlane(pointOnPlane, planeNormal, insidePoints[0], outsidePoints[0]))
+
+		elif len(insidePoints) == 3:
+			
+			outputPoints.append(insidePoints[0])
+			outputPoints.append(insidePoints[1])
+			outputPoints.append(insidePoints[2])
 
 		return outputPoints
 
