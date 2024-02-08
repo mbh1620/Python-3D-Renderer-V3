@@ -17,6 +17,8 @@ from Functions.normaliseVector import sortFaces
 from Functions.normaliseVector import calculateTriangleCenter
 from Functions.normaliseVector import calculateFaceNormal
 from Functions.normaliseVector import clamp
+from Functions.normaliseVector import sortWireframes
+
 
 class ProjectionViewer:
 
@@ -37,7 +39,7 @@ class ProjectionViewer:
 		self.materials = {}
 
 		self.nearPlaneZ = 400
-		self.farPlaneZ = 5000
+		self.farPlaneZ = 7000
 
 		self.initialise()
 
@@ -69,6 +71,8 @@ class ProjectionViewer:
 	def display(self):
 
 		self.screen.fill(self.backgroundColour)
+
+		sortWireframes(self.wireframes)
 
 		for wireframe in self.wireframes.values():
 

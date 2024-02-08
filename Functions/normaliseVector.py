@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 def normaliseVector(vector):
 
@@ -62,6 +63,24 @@ def sortKey(inputs):
 
 	return (addPerspectiveToNode(inputs[0])[2] + addPerspectiveToNode(inputs[1])[2] + addPerspectiveToNode(inputs[2])[2])/3.0
 
+def sortWireframes(wireframesDictionary):
+
+	wireframesList = list(wireframesDictionary.values())
+
+	wireframesList.sort(key=sortWireframesKey, reverse=True)
+
+def sortWireframesKey(inputs):
+
+	if int(len(inputs.nodes)/3) == 0:
+
+		numberOfApproximationPoints = 1
+
+	else:
+
+		numberOfApproximationPoints = int(len(inputs.nodes)/3)
+
+	return approximateCentroid(inputs,numberOfApproximationPoints)[2]
+
 def calculateTriangleCenter(n1, n2, n3):
 
 	center = vectorDivide(vectorAdd(vectorAdd(n1, n2), n3), 3.0)
@@ -96,6 +115,29 @@ def addPerspectiveToNode(node):
 			pNode[2] = node[2] * 1
 
 		return pNode
+
+def approximateCentroid(wireframe, numberOfApproximationPoints):
+
+	output = [0, 0, 0]
+	usedRandomIndices = []
+	randomIndex  = randint(0,len(wireframe.nodes)-1)
+
+	for i in range(0,numberOfApproximationPoints-1):
+
+		while randomIndex in usedRandomIndices:
+			
+			randomIndex = randint(0,len(wireframe.nodes)-1)
+
+		else:
+
+			usedRandomIndices.append(randomIndex)
+			output[0] += wireframe.nodes[randomIndex][0]
+			output[1] += wireframe.nodes[randomIndex][1]
+			output[2] += wireframe.nodes[randomIndex][2]
+
+	output = vectorDivide(output, numberOfApproximationPoints)
+
+	return output
 
 
 
