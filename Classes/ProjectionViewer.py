@@ -47,7 +47,7 @@ class ProjectionViewer:
 
 	def initialise(self):
 
-		light1 = Light([200,200,200], 1, [1,1,1])
+		light1 = Light([200,2000,200], 1, [1,1,1])
 
 		self.addLight(light1)
 
@@ -131,18 +131,38 @@ class ProjectionViewer:
 					if len(outputPoints) == 3:
 
 						if self.backFaceCull(self.addPerspectiveToNode(outputPoints[0]), self.addPerspectiveToNode(outputPoints[1]), self.addPerspectiveToNode(outputPoints[2])):
-
+							
 							triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
 
 					elif len(outputPoints) == 6:
+
+						outputPointsA = outputPoints[:3]
+						outputPointsB = outputPoints[3:6]
+
+						if self.backFaceCull(self.addPerspectiveToNode(outputPointsA[0]), self.addPerspectiveToNode(outputPointsA[1]), self.addPerspectiveToNode(outputPointsA[2])):
+
+							triangles.append([outputPointsA[0], outputPointsA[1], outputPointsA[2]])
+
+						if self.backFaceCull(self.addPerspectiveToNode(outputPointsB[0]), self.addPerspectiveToNode(outputPointsB[1]), self.addPerspectiveToNode(outputPointsB[2])):
+
+							triangles.append([outputPointsB[0], outputPointsB[1], outputPointsB[2]])
+
+
+				elif len(outputPoints) == 6:
+
+					outputPointsA = outputPoints[:3]
+					outputPointsB = outputPoints[3:6]
+
+					outputPointsA = self.clipFacePointsAgainstPlane([0,0,self.farPlaneZ], [0,0,-1], outputPointsA, wireframe)
+					outputPointsB = self.clipFacePointsAgainstPlane([0,0,self.farPlaneZ], [0,0,-1], outputPointsB, wireframe)
 				
-						if self.backFaceCull(self.addPerspectiveToNode(outputPoints[0]), self.addPerspectiveToNode(outputPoints[1]), self.addPerspectiveToNode(outputPoints[2])):
+					if self.backFaceCull(self.addPerspectiveToNode(outputPointsA[0]), self.addPerspectiveToNode(outputPointsA[1]), self.addPerspectiveToNode(outputPointsA[2])):
 
-							triangles.append([outputPoints[0], outputPoints[1], outputPoints[2]])
+						triangles.append([outputPointsA[0], outputPointsA[1], outputPointsA[2]])
 
-						if self.backFaceCull(self.addPerspectiveToNode(outputPoints[3]), self.addPerspectiveToNode(outputPoints[4]), self.addPerspectiveToNode(outputPoints[5])):
+					if self.backFaceCull(self.addPerspectiveToNode(outputPointsB[0]), self.addPerspectiveToNode(outputPointsB[1]), self.addPerspectiveToNode(outputPointsB[2])):
 
-							triangles.append([outputPoints[3], outputPoints[4], outputPoints[5]])
+						triangles.append([outputPointsB[0], outputPointsB[1], outputPointsB[2]])
 
 				j = 0
 
